@@ -1,4 +1,4 @@
-import type { CreateUserInput, User } from "@/types"
+import type { CreateUserInput, LoginUserInput, User } from "@/types"
 import { apiFetch } from "./api"
 
 export async function getUsers(): Promise<User[]> {
@@ -11,6 +11,13 @@ export async function getUser(id: number): Promise<User> {
 
 export async function createUser(payload: CreateUserInput): Promise<User> {
   return apiFetch<User>("user", {
+    method: "POST",
+    body: payload,
+  })
+}
+
+export async function loginUser(payload: LoginUserInput): Promise<User> {
+  return apiFetch<User>("user/login", {
     method: "POST",
     body: payload,
   })
