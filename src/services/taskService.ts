@@ -1,4 +1,9 @@
-import type { CreateTaskInput, TaskItem, TaskTag, UpdateTaskInput } from "@/types"
+import type {
+  CreateTaskInput,
+  TaskItem,
+  TaskTag,
+  UpdateTaskInput,
+} from "@/types"
 import { apiFetch } from "./api"
 
 export async function getAvailableTags(): Promise<TaskTag[]> {

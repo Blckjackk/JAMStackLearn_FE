@@ -434,7 +434,8 @@ export function ProjectCrudDashboard() {
             (GET/POST) run in this client island.
           </p>
           <p className="text-sm font-medium text-slate-700">
-            Login state: {authenticatedUser ? authenticatedUser.email : "Not logged in"}
+            Login state:{" "}
+            {authenticatedUser ? authenticatedUser.email : "Not logged in"}
           </p>
         </section>
 
@@ -1009,7 +1010,10 @@ export function ProjectCrudDashboard() {
                             <select
                               value={task.tags[0]?.id ?? ""}
                               onChange={(event) =>
-                                void handleUpdateTaskTag(task.id, event.target.value)
+                                void handleUpdateTaskTag(
+                                  task.id,
+                                  event.target.value
+                                )
                               }
                               disabled={updatingTaskId === task.id}
                               className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
@@ -1024,7 +1028,9 @@ export function ProjectCrudDashboard() {
                             {task.tags[0] && (
                               <span
                                 className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                style={{ backgroundColor: task.tags[0].colorHex }}
+                                style={{
+                                  backgroundColor: task.tags[0].colorHex,
+                                }}
                               >
                                 {task.tags[0].tagName}
                               </span>
