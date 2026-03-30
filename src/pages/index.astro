@@ -2,12 +2,47 @@
 export const prerender = true
 
 import MainLayout from "@/layouts/main.astro"
-import { ProjectCrudDashboard } from "@/components/project-crud-dashboard"
 ---
 
 <MainLayout
   title="Project Orbit Astro"
-  description="Astro JAMstack shell with dynamic CRUD for users and projects."
+  description="Entry point untuk mengarahkan user ke login atau dashboard."
 >
-  <ProjectCrudDashboard client:load />
+  <main
+    class="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-6 py-12 text-center"
+  >
+    <p class="text-xs font-semibold tracking-[0.24em] text-slate-600 uppercase">
+      Project Orbit Astro
+    </p>
+    <h1
+      class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
+    >
+      Menyiapkan halaman kamu...
+    </h1>
+    <p class="mt-3 text-sm text-slate-600">
+      Jika tidak otomatis pindah, gunakan tombol di bawah.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="/login"
+        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+      >
+        Ke Login
+      </a>
+      <a
+        href="/dashboard"
+        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+      >
+        Ke Dashboard
+      </a>
+    </div>
+  </main>
+
+  <script is:inline>
+    const sessionKey = "astro-app-auth-user"
+    const hasSession =
+      typeof window !== "undefined" && window.localStorage.getItem(sessionKey)
+
+    window.location.replace(hasSession ? "/dashboard" : "/login")
+  </script>
 </MainLayout>

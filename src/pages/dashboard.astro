@@ -1,0 +1,13 @@
+---
+export const prerender = true
+
+import MainLayout from "@/layouts/main.astro"
+import { UserProjectDashboard } from "@/components/user-project-dashboard"
+---
+
+<MainLayout
+  title="Dashboard | Project Orbit Astro"
+  description="Dashboard project berdasarkan user yang login."
+>
+  <UserProjectDashboard client:load />
+</MainLayout>

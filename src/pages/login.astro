@@ -1,0 +1,17 @@
+---
+export const prerender = true
+
+import MainLayout from "@/layouts/main.astro"
+import { LoginForm } from "@/components/login-form"
+---
+
+<MainLayout
+  title="Login | Project Orbit Astro"
+  description="Login ke workspace Astro untuk melihat task berdasarkan user."
+>
+  <div
+    class="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(56,189,248,0.18),transparent_35%),radial-gradient(circle_at_82%_14%,rgba(16,185,129,0.2),transparent_32%),linear-gradient(180deg,#f8fafc_0%,#f0fdfa_55%,#f8fafc_100%)] px-6 py-10 lg:px-10 lg:py-14"
+  >
+    <LoginForm client:load />
+  </div>
+</MainLayout>

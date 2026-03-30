@@ -16,19 +16,29 @@ export async function getTasksByProject(
   return apiFetch<TaskItem[]>(`task/project/${projectId}`)
 }
 
-export async function createTask(payload: CreateTaskInput): Promise<TaskItem> {
+export async function createTask(
+  actorUserId: number,
+  payload: CreateTaskInput
+): Promise<TaskItem> {
   return apiFetch<TaskItem>("task", {
     method: "POST",
+    headers: {
+      "X-User-Id": actorUserId.toString(),
+    },
     body: payload,
   })
 }
 
 export async function updateTask(
+  actorUserId: number,
   taskId: number,
   payload: UpdateTaskInput
 ): Promise<void> {
   return apiFetch<void>(`task/${taskId}`, {
     method: "PUT",
+    headers: {
+      "X-User-Id": actorUserId.toString(),
+    },
     body: payload,
   })
 }

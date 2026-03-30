@@ -1,12 +1,13 @@
 export type TaskTag = {
   id: number
-  tagName: string
-  colorHex: string
+  name: string
+  color: string
 }
 
 export type TaskItem = {
   id: number
   projectId: number
+  assigneeUserId: number | null
   title: string
   content: string | null
   isCompleted: boolean
@@ -16,6 +17,7 @@ export type TaskItem = {
 
 export type CreateTaskInput = {
   projectId: number
+  assigneeUserId?: number
   title: string
   content?: string
   dueDate?: string
@@ -23,6 +25,7 @@ export type CreateTaskInput = {
 }
 
 export type UpdateTaskInput = {
+  assigneeUserId?: number
   title?: string
   content?: string
   isCompleted?: boolean

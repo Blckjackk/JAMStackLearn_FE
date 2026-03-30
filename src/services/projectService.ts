@@ -10,10 +10,14 @@ export async function getProject(id: number): Promise<Project> {
 }
 
 export async function createProject(
+  actorUserId: number,
   payload: CreateProjectInput
 ): Promise<Project> {
   return apiFetch<Project>("project", {
     method: "POST",
+    headers: {
+      "X-User-Id": actorUserId.toString(),
+    },
     body: payload,
   })
 }

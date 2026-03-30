@@ -240,7 +240,7 @@ const userLabel = activeUser?.username ?? `User #${activeUserId}`
                           Project #{project.id}
                         </p>
                       </div>
-                      <Badge variant="secondary">User {project.userId}</Badge>
+                      <Badge variant="secondary">{project.userRole}</Badge>
                     </div>
                     <p class="mt-4 line-clamp-4 text-sm leading-6 text-muted-foreground">
                       {project.description.trim() ||
@@ -330,7 +330,8 @@ const userLabel = activeUser?.username ?? `User #${activeUserId}`
               <TableHeader>
                 <TableRow>
                   <TableHead>Project</TableHead>
-                  <TableHead>User ID</TableHead>
+                  <TableHead>My Role</TableHead>
+                  <TableHead>Members</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Created at</TableHead>
                 </TableRow>
@@ -341,7 +342,8 @@ const userLabel = activeUser?.username ?? `User #${activeUserId}`
                     <TableCell className="font-medium text-foreground">
                       {project.name}
                     </TableCell>
-                    <TableCell>{project.userId}</TableCell>
+                    <TableCell>{project.userRole}</TableCell>
+                    <TableCell>{project.members.length}</TableCell>
                     <TableCell className="max-w-xs truncate text-muted-foreground">
                       {project.description.trim() || "No description yet"}
                     </TableCell>
