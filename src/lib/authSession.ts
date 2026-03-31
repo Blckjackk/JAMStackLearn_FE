@@ -30,7 +30,10 @@ export function getSessionUser(): User | null {
       return null
     }
 
-    return parsed
+    return {
+      ...parsed,
+      userCode: typeof parsed.userCode === "string" ? parsed.userCode : "",
+    }
   } catch {
     return null
   }

@@ -290,6 +290,9 @@ export function UserProjectTasks() {
             Kelola task untuk project terpilih. Kembali ke dashboard untuk pilih
             project lain.
           </p>
+          <p className="mt-1 text-sm text-slate-600">
+            User code: {authenticatedUser?.userCode || "-"}
+          </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <a
               href="/dashboard"

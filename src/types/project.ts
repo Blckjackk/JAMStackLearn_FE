@@ -10,9 +10,21 @@ export type Project = {
 
 export type ProjectMember = {
   userId: number
+  userCode: string
   username: string
   email: string
   role: string
+  joinedAt: string
+  isAccepted: boolean
+}
+
+export type ProjectInvite = {
+  projectUserId: number
+  projectId: number
+  userId: number
+  userCode: string
+  role: string
+  isAccepted: boolean
   joinedAt: string
 }
 

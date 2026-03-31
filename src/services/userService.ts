@@ -9,6 +9,7 @@ type FirebaseLoginResponse = {
     firebaseUid: string
     email: string
     name: string
+    userCode: string
   }
 }
 
@@ -48,5 +49,6 @@ export async function loginWithFirebase(token: string): Promise<User> {
     id: response.user.id,
     username: response.user.name || response.user.email.split("@")[0],
     email: response.user.email,
+    userCode: response.user.userCode,
   }
 }

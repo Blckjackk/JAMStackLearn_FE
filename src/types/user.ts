@@ -2,6 +2,7 @@ export type User = {
   id: number
   username: string
   email: string
+  userCode: string
 }
 
 export type CreateUserInput = {
