@@ -530,17 +530,17 @@ export function UserProjectTasks() {
                         </td>
                         <td className="px-3 py-2 text-slate-600">
                           <select
-                            value={task.isCompleted ? "done" : "open"}
+                            value={task.isCompleted ? "selesai" : "on-progress"}
                             onChange={(event) =>
                               void handleUpdateTask(task.id, {
-                                isCompleted: event.target.value === "done",
+                                isCompleted: event.target.value === "selesai",
                               })
                             }
                             disabled={updatingTaskId === task.id}
                             className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
                           >
-                            <option value="open">Open</option>
-                            <option value="done">Done</option>
+                            <option value="on-progress">On Progress</option>
+                            <option value="selesai">Selesai</option>
                           </select>
                         </td>
                         <td className="px-3 py-2 text-slate-600">

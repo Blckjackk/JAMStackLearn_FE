@@ -8,12 +8,7 @@ import {
   getPendingInvites,
   getProjects,
 } from "@/services/projectService"
-import type {
-  CreateProjectInput,
-  Project,
-  ProjectInvite,
-  User,
-} from "@/types"
+import type { CreateProjectInput, Project, ProjectInvite, User } from "@/types"
 
 const initialProjectForm: CreateProjectInput = {
   name: "",
@@ -403,9 +398,7 @@ export function UserProjectDashboard() {
                 </button>
               </div>
               {pendingInvites.length === 0 ? (
-                <p className="text-sm text-slate-500">
-                  Belum ada undangan.
-                </p>
+                <p className="text-sm text-slate-500">Belum ada undangan.</p>
               ) : (
                 <div className="space-y-3">
                   {pendingInvites.map((invite) => (
