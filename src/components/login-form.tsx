@@ -1,13 +1,9 @@
-import { useState, type FormEvent } from "react"
+import { useState } from "react"
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 
 import { saveSessionUser } from "@/lib/authSession"
-import { loginUser } from "@/services/userService"
-import type { LoginUserInput } from "@/types"
-
-const initialForm: LoginUserInput = {
-  email: "",
-  password: "",
-}
+import { auth } from "@/lib/firebase"
+import { loginWithFirebase } from "@/services/userService"
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -18,25 +14,19 @@ function toErrorMessage(error: unknown): string {
 }
 
 export function LoginForm() {
-  const [form, setForm] = useState<LoginUserInput>(initialForm)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function handleGoogleLogin() {
     setLoading(true)
     setMessage(null)
 
     try {
-      if (!form.email.trim() || !form.password.trim()) {
-        throw new Error("Email dan password wajib diisi.")
-      }
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      const token = await result.user.getIdToken()
 
-      const user = await loginUser({
-        email: form.email.trim(),
-        password: form.password,
-      })
-
+      const user = await loginWithFirebase(token)
       saveSessionUser(user)
       setMessage(`Login berhasil. Selamat datang, ${user.username}.`)
       window.location.href = "/dashboard"
@@ -59,47 +49,19 @@ export function LoginForm() {
         Setelah login, kamu hanya akan melihat project dan task milik akunmu.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm text-slate-600">Email</label>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(event) =>
-              setForm((previous) => ({
-                ...previous,
-                email: event.target.value,
-              }))
-            }
-            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-sky-300 outline-none focus:ring"
-            placeholder="nama@email.com"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm text-slate-600">Password</label>
-          <input
-            type="password"
-            value={form.password}
-            onChange={(event) =>
-              setForm((previous) => ({
-                ...previous,
-                password: event.target.value,
-              }))
-            }
-            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-sky-300 outline-none focus:ring"
-            placeholder="Password"
-          />
-        </div>
-
+      <div className="mt-6 space-y-4">
         <button
-          type="submit"
+          type="button"
+          onClick={() => void handleGoogleLogin()}
           disabled={loading}
-          className="w-full rounded-xl bg-sky-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Memproses..." : "Login"}
+          {loading ? "Memproses..." : "Login with Google"}
         </button>
-      </form>
+        <p className="text-xs text-slate-500">
+          Login menggunakan Google akan membuat akun baru jika belum ada.
+        </p>
+      </div>
 
       {message && <p className="mt-4 text-sm text-slate-600">{message}</p>}
     </section>

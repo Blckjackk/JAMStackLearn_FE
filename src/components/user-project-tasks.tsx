@@ -79,6 +79,9 @@ export function UserProjectTasks() {
   const [tasks, setTasks] = useState<TaskItem[]>([])
   const [availableTags, setAvailableTags] = useState<TaskTag[]>([])
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null)
+  const [selectedAssigneeUserId, setSelectedAssigneeUserId] = useState<
+    number | null
+  >(null)
 
   const [loadingProjects, setLoadingProjects] = useState(false)
   const [loadingTasks, setLoadingTasks] = useState(false)
@@ -95,6 +98,18 @@ export function UserProjectTasks() {
       userProjects.find((project) => project.id === selectedProjectId) ?? null,
     [userProjects, selectedProjectId]
   )
+
+  const isProjectManager = useMemo(() => {
+    if (!selectedProject?.userRole) {
+      return false
+    }
+
+    return selectedProject.userRole.toLowerCase().includes("project manager")
+  }, [selectedProject])
+
+  const projectMembers = useMemo(() => {
+    return selectedProject?.members ?? []
+  }, [selectedProject])
 
   const refreshProjects = useCallback(async (userId: number) => {
     setLoadingProjects(true)
@@ -205,6 +220,8 @@ export function UserProjectTasks() {
         content: taskForm.content.trim() || undefined,
         dueDate: toDueDateIso(taskForm.dueDate),
         tagIds: selectedTagId === null ? [] : [selectedTagId],
+        assigneeUserId:
+          selectedAssigneeUserId === null ? undefined : selectedAssigneeUserId,
       }
 
       if (!authenticatedUser) {
@@ -214,6 +231,7 @@ export function UserProjectTasks() {
       await createTask(authenticatedUser.id, payload)
       setTaskForm(initialTaskForm)
       setSelectedTagId(null)
+      setSelectedAssigneeUserId(null)
       setTaskMessage("Task created successfully.")
       await refreshTasks(selectedProjectId)
     } catch (error) {
@@ -334,107 +352,135 @@ export function UserProjectTasks() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <form
-            onSubmit={handleCreateTask}
-            className="space-y-4 rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <h2 className="text-xl font-semibold text-slate-900">
-                Create task
-              </h2>
-              <button
-                type="button"
-                onClick={() => void refreshAvailableTags()}
-                className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
-              >
-                {loadingTags ? "Refreshing..." : "Refresh tags"}
-              </button>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-600">Task title</label>
-              <input
-                value={taskForm.title}
-                onChange={(event) =>
-                  setTaskForm((previous) => ({
-                    ...previous,
-                    title: event.target.value,
-                  }))
-                }
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
-                placeholder="Design landing section"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-600">Content</label>
-              <textarea
-                value={taskForm.content}
-                onChange={(event) =>
-                  setTaskForm((previous) => ({
-                    ...previous,
-                    content: event.target.value,
-                  }))
-                }
-                rows={3}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
-                placeholder="Detail pekerjaan"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-600">Due date</label>
-              <input
-                type="date"
-                value={taskForm.dueDate}
-                onChange={(event) =>
-                  setTaskForm((previous) => ({
-                    ...previous,
-                    dueDate: event.target.value,
-                  }))
-                }
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-600">Tags template</label>
-              {availableTags.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-                  {loadingTags ? "Loading tags..." : "Belum ada template tag."}
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2 rounded-xl border border-slate-300 p-3">
-                  {availableTags.map((tag) => {
-                    const active = selectedTagId === tag.id
-                    return (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => selectSingleTag(tag.id)}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                          active
-                            ? "border-slate-900 text-white"
-                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                        }`}
-                        style={{
-                          backgroundColor: active ? tag.color : undefined,
-                        }}
-                      >
-                        {tag.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={creatingTask || selectedProjectId === null}
-              className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+          {isProjectManager ? (
+            <form
+              onSubmit={handleCreateTask}
+              className="space-y-4 rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm"
             >
-              {creatingTask ? "Creating task..." : "Create task"}
-            </button>
-            {taskMessage && (
-              <p className="text-sm text-slate-600">{taskMessage}</p>
-            )}
-          </form>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="text-xl font-semibold text-slate-900">
+                  Create task
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => void refreshAvailableTags()}
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                >
+                  {loadingTags ? "Refreshing..." : "Refresh tags"}
+                </button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-600">Task title</label>
+                <input
+                  value={taskForm.title}
+                  onChange={(event) =>
+                    setTaskForm((previous) => ({
+                      ...previous,
+                      title: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
+                  placeholder="Design landing section"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-600">Content</label>
+                <textarea
+                  value={taskForm.content}
+                  onChange={(event) =>
+                    setTaskForm((previous) => ({
+                      ...previous,
+                      content: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
+                  placeholder="Detail pekerjaan"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-600">Assign to</label>
+                <select
+                  value={selectedAssigneeUserId ?? ""}
+                  onChange={(event) =>
+                    setSelectedAssigneeUserId(
+                      event.target.value ? Number(event.target.value) : null
+                    )
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                  disabled={projectMembers.length === 0}
+                >
+                  <option value="">Unassigned</option>
+                  {projectMembers.map((member) => (
+                    <option key={member.userId} value={member.userId}>
+                      {member.username}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-600">Due date</label>
+                <input
+                  type="date"
+                  value={taskForm.dueDate}
+                  onChange={(event) =>
+                    setTaskForm((previous) => ({
+                      ...previous,
+                      dueDate: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 ring-emerald-300 outline-none focus:ring"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-600">Tags template</label>
+                {availableTags.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                    {loadingTags
+                      ? "Loading tags..."
+                      : "Belum ada template tag."}
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2 rounded-xl border border-slate-300 p-3">
+                    {availableTags.map((tag) => {
+                      const active = selectedTagId === tag.id
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => selectSingleTag(tag.id)}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                            active
+                              ? "border-slate-900 text-white"
+                              : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                          style={{
+                            backgroundColor: active ? tag.color : undefined,
+                          }}
+                        >
+                          {tag.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={creatingTask || selectedProjectId === null}
+                className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {creatingTask ? "Creating task..." : "Create task"}
+              </button>
+              {taskMessage && (
+                <p className="text-sm text-slate-600">{taskMessage}</p>
+              )}
+            </form>
+          ) : (
+            <div className="rounded-3xl border border-amber-200 bg-amber-50/70 p-6 text-sm text-amber-800 shadow-sm">
+              Create task hanya untuk Project Manager.
+            </div>
+          )}
 
           <article className="rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between gap-3">
@@ -459,13 +505,14 @@ export function UserProjectTasks() {
                     <th className="px-3 py-2">Task</th>
                     <th className="px-3 py-2">Status</th>
                     <th className="px-3 py-2">Due</th>
+                    <th className="px-3 py-2">Assignee</th>
                     <th className="px-3 py-2">Tag</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tasks.length === 0 ? (
                     <tr>
-                      <td className="px-3 py-3 text-slate-500" colSpan={4}>
+                      <td className="px-3 py-3 text-slate-500" colSpan={5}>
                         {loadingTasks ? "Loading tasks..." : "Belum ada task."}
                       </td>
                     </tr>
@@ -495,6 +542,29 @@ export function UserProjectTasks() {
                         </td>
                         <td className="px-3 py-2 text-slate-600">
                           {task.dueDate ? formatDate(task.dueDate) : "-"}
+                        </td>
+                        <td className="px-3 py-2 text-slate-600">
+                          <select
+                            value={task.assigneeUserId ?? ""}
+                            onChange={(event) =>
+                              void handleUpdateTask(task.id, {
+                                assigneeUserId: event.target.value
+                                  ? Number(event.target.value)
+                                  : undefined,
+                              })
+                            }
+                            disabled={
+                              !isProjectManager || updatingTaskId === task.id
+                            }
+                            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
+                          >
+                            <option value="">Unassigned</option>
+                            {projectMembers.map((member) => (
+                              <option key={member.userId} value={member.userId}>
+                                {member.username}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                         <td className="px-3 py-2 text-slate-600">
                           <div className="flex flex-wrap items-center gap-2">
