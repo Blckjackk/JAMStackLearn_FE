@@ -26,6 +26,7 @@ export type CreateTaskInput = {
 
 export type UpdateTaskInput = {
   assigneeUserId?: number
+  clearAssignee?: boolean
   title?: string
   content?: string
   isCompleted?: boolean

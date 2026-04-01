@@ -8,6 +8,9 @@ import react from "@astrojs/react"
 export default defineConfig({
   vite: /** @type {any} */ ({
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: ["screwed-nonhedonistically-joycelyn.ngrok-free.dev"],
+    },
   }),
   integrations: [react()],
 })

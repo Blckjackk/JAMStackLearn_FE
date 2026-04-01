@@ -1,31 +1,14 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { clearSessionUser, getSessionUser } from "@/lib/authSession"
-import { auth } from "@/lib/firebase"
-import {
-  acceptInvite,
-  createProject,
-  createProjectInvite,
-  getPendingInvites,
-  getProjects,
-} from "@/services/projectService"
+import { createProject, getProjects } from "@/services/projectService"
 import { getUser } from "@/services/userService"
-import type { CreateProjectInput, Project, ProjectInvite, User } from "@/types"
-import { signOut } from "firebase/auth"
+import type { CreateProjectInput, Project, User } from "@/types"
 
 const initialProjectForm: CreateProjectInput = {
   name: "",
   description: "",
 }
-
-const roleOptions = [
-  "Project Manager",
-  "Frontend",
-  "Backend",
-  "QA",
-  "DevOps",
-  "Viewer",
-]
 
 function formatDate(value: string): string {
   const date = new Date(value)
@@ -56,15 +39,6 @@ export function UserProjectDashboard() {
   const [loadingProjects, setLoadingProjects] = useState(false)
   const [creatingProject, setCreatingProject] = useState(false)
 
-  const [pendingInvites, setPendingInvites] = useState<ProjectInvite[]>([])
-  const [loadingInvites, setLoadingInvites] = useState(false)
-  const [inviteMessage, setInviteMessage] = useState<string | null>(null)
-  const [inviteForm, setInviteForm] = useState({
-    projectId: "",
-    userCode: "",
-    role: "Viewer",
-  })
-
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [projectMessage, setProjectMessage] = useState<string | null>(null)
   const [projectForm, setProjectForm] =
@@ -79,24 +53,9 @@ export function UserProjectDashboard() {
       setProjects(response)
     } catch (error) {
       setProjects([])
-      setGlobalError(`Failed to load projects: ${toErrorMessage(error)}`)
+      setGlobalError(`Gagal memuat project: ${toErrorMessage(error)}`)
     } finally {
       setLoadingProjects(false)
-    }
-  }, [])
-
-  const refreshInvites = useCallback(async (userId: number) => {
-    setLoadingInvites(true)
-    setInviteMessage(null)
-
-    try {
-      const response = await getPendingInvites(userId)
-      setPendingInvites(response)
-    } catch (error) {
-      setPendingInvites([])
-      setInviteMessage(`Failed to load invites: ${toErrorMessage(error)}`)
-    } finally {
-      setLoadingInvites(false)
     }
   }, [])
 
@@ -144,8 +103,7 @@ export function UserProjectDashboard() {
     }
 
     void refreshProjects(authenticatedUser.id)
-    void refreshInvites(authenticatedUser.id)
-  }, [authenticatedUser, refreshProjects, refreshInvites])
+  }, [authenticatedUser, refreshProjects])
 
   async function handleCreateProject(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -167,70 +125,13 @@ export function UserProjectDashboard() {
       })
 
       setProjectForm(initialProjectForm)
-      setProjectMessage(`Project ${created.name} created successfully.`)
+      setProjectMessage(`Project ${created.name} berhasil dibuat.`)
       await refreshProjects(authenticatedUser.id)
     } catch (error) {
-      setProjectMessage(`Create project failed: ${toErrorMessage(error)}`)
+      setProjectMessage(`Gagal membuat project: ${toErrorMessage(error)}`)
     } finally {
       setCreatingProject(false)
     }
-  }
-
-  async function handleInviteSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setInviteMessage(null)
-
-    try {
-      if (!authenticatedUser) {
-        throw new Error("Session user tidak ditemukan.")
-      }
-
-      const projectId = Number(inviteForm.projectId)
-      if (!projectId) {
-        throw new Error("Pilih project dulu.")
-      }
-
-      if (!inviteForm.userCode.trim()) {
-        throw new Error("User code wajib diisi.")
-      }
-
-      await createProjectInvite(projectId, authenticatedUser.id, {
-        userCode: inviteForm.userCode.trim(),
-        role: inviteForm.role,
-      })
-
-      setInviteForm((previous) => ({
-        ...previous,
-        userCode: "",
-      }))
-      setInviteMessage("Invite berhasil dikirim.")
-    } catch (error) {
-      setInviteMessage(`Invite gagal: ${toErrorMessage(error)}`)
-    }
-  }
-
-  async function handleAcceptInvite(inviteId: number) {
-    if (!authenticatedUser) {
-      return
-    }
-
-    try {
-      await acceptInvite(inviteId, authenticatedUser.id)
-      await refreshInvites(authenticatedUser.id)
-      await refreshProjects(authenticatedUser.id)
-    } catch (error) {
-      setInviteMessage(`Accept invite gagal: ${toErrorMessage(error)}`)
-    }
-  }
-
-  async function handleLogout() {
-    clearSessionUser()
-    try {
-      await signOut(auth)
-    } catch {
-      // Ignore Firebase logout errors and still redirect.
-    }
-    window.location.href = "/login"
   }
 
   if (checkingSession) {
@@ -248,25 +149,24 @@ export function UserProjectDashboard() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold tracking-[0.24em] text-teal-700 uppercase">
-                Personal Workspace
+                Ruang Kerja Pribadi
               </p>
               <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
                 Halo, {authenticatedUser?.username}
               </h1>
               <p className="mt-2 text-sm text-slate-600">
-                Ini halaman project kamu. Klik satu project untuk lihat tasknya.
+                Kelola project dan undangan kamu di sini.
               </p>
               <p className="mt-1 text-sm text-slate-600">
                 User code kamu: {authenticatedUser?.userCode || "-"}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+            <a
+              href="/invites"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Logout
-            </button>
+              Lihat undangan
+            </a>
           </div>
         </section>
 
@@ -279,7 +179,7 @@ export function UserProjectDashboard() {
         <section className="grid gap-4 sm:grid-cols-2">
           <article className="rounded-2xl border border-slate-200 bg-white/85 p-5 shadow-sm">
             <p className="text-xs tracking-wider text-slate-500 uppercase">
-              Projects
+              Project
             </p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {projects.length}
@@ -301,10 +201,10 @@ export function UserProjectDashboard() {
             className="space-y-4 rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm"
           >
             <h2 className="text-xl font-semibold text-slate-900">
-              Create project
+              Buat project
             </h2>
             <div className="space-y-2">
-              <label className="text-sm text-slate-600">Project name</label>
+              <label className="text-sm text-slate-600">Nama project</label>
               <input
                 value={projectForm.name}
                 onChange={(event) =>
@@ -318,7 +218,7 @@ export function UserProjectDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-slate-600">Description</label>
+              <label className="text-sm text-slate-600">Deskripsi</label>
               <textarea
                 value={projectForm.description}
                 onChange={(event) =>
@@ -337,131 +237,26 @@ export function UserProjectDashboard() {
               disabled={creatingProject}
               className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {creatingProject ? "Creating project..." : "Create project"}
+              {creatingProject ? "Membuat project..." : "Buat project"}
             </button>
             {projectMessage && (
               <p className="text-sm text-slate-600">{projectMessage}</p>
             )}
           </form>
-
           <div className="space-y-6">
-            <form
-              onSubmit={handleInviteSubmit}
-              className="space-y-4 rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm"
-            >
-              <h2 className="text-xl font-semibold text-slate-900">
-                Invite member
-              </h2>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-600">Project</label>
-                <select
-                  value={inviteForm.projectId}
-                  onChange={(event) =>
-                    setInviteForm((previous) => ({
-                      ...previous,
-                      projectId: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
-                >
-                  <option value="">Pilih project</option>
-                  {projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-600">User code</label>
-                <input
-                  value={inviteForm.userCode}
-                  onChange={(event) =>
-                    setInviteForm((previous) => ({
-                      ...previous,
-                      userCode: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900"
-                  placeholder="USR-ABC12345"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-600">Role</label>
-                <select
-                  value={inviteForm.role}
-                  onChange={(event) =>
-                    setInviteForm((previous) => ({
-                      ...previous,
-                      role: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
-                >
-                  {roleOptions.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-600"
-              >
-                Kirim invite
-              </button>
-              {inviteMessage && (
-                <p className="text-sm text-slate-600">{inviteMessage}</p>
-              )}
-            </form>
-
             <article className="rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Pending invites
-                </h3>
-                <button
-                  type="button"
-                  onClick={() =>
-                    authenticatedUser &&
-                    void refreshInvites(authenticatedUser.id)
-                  }
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
-                >
-                  {loadingInvites ? "Refreshing..." : "Reload"}
-                </button>
-              </div>
-              {pendingInvites.length === 0 ? (
-                <p className="text-sm text-slate-500">Belum ada undangan.</p>
-              ) : (
-                <div className="space-y-3">
-                  {pendingInvites.map((invite) => (
-                    <div
-                      key={invite.projectUserId}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          Project #{invite.projectId}
-                        </p>
-                        <p className="text-xs text-slate-600">
-                          Role: {invite.role}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void handleAcceptInvite(invite.projectUserId)
-                        }
-                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500"
-                      >
-                        Accept
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <h3 className="text-lg font-semibold text-slate-900">
+                Undangan masuk project
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Kelola undangan masuk di halaman khusus agar lebih rapi.
+              </p>
+              <a
+                href="/invites"
+                className="mt-4 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Buka halaman undangan
+              </a>
             </article>
           </div>
 
@@ -478,7 +273,7 @@ export function UserProjectDashboard() {
                 }
                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
               >
-                {loadingProjects ? "Refreshing..." : "Reload"}
+                {loadingProjects ? "Memuat..." : "Muat ulang"}
               </button>
             </div>
             <div className="max-h-96 overflow-auto rounded-xl border border-slate-200">
@@ -510,7 +305,7 @@ export function UserProjectDashboard() {
                             {project.name}
                           </p>
                           <p className="text-xs text-slate-600">
-                            {project.description || "No description"}
+                            {project.description || "Belum ada deskripsi"}
                           </p>
                         </td>
                         <td className="px-3 py-2 text-slate-600">

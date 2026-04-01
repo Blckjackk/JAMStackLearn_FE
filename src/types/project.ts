@@ -15,17 +15,19 @@ export type ProjectMember = {
   email: string
   role: string
   joinedAt: string
-  isAccepted: boolean
 }
 
 export type ProjectInvite = {
-  projectUserId: number
+  id: number
   projectId: number
-  userId: number
-  userCode: string
+  projectName: string
+  invitedUserId: number
+  invitedUserCode: string
+  invitedByUserId: number
+  invitedByUsername: string
   role: string
-  isAccepted: boolean
-  joinedAt: string
+  status: string
+  createdAt: string
 }
 
 export type CreateProjectInput = {

@@ -1,0 +1,22 @@
+---
+import MainLayout from "@/layouts/main.astro"
+import AppShell from "@/components/app-shell"
+
+interface Props {
+  title?: string
+  description?: string
+  pageTitle?: string
+}
+
+const {
+  title = "Project Orbit",
+  description = "Workspace untuk mengatur project dan jobdesk.",
+  pageTitle,
+} = Astro.props
+---
+
+<MainLayout title={title} description={description}>
+  <AppShell pageTitle={pageTitle} client:load>
+    <slot />
+  </AppShell>
+</MainLayout>

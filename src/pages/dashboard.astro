@@ -1,13 +1,14 @@
 ---
 export const prerender = true
 
-import MainLayout from "@/layouts/main.astro"
+import AppLayout from "@/layouts/app.astro"
 import { UserProjectDashboard } from "@/components/user-project-dashboard"
 ---
 
-<MainLayout
+<AppLayout
   title="Dashboard | Project Orbit Astro"
   description="Dashboard project berdasarkan user yang login."
+  pageTitle="Dashboard"
 >
   <UserProjectDashboard client:load />
-</MainLayout>
+</AppLayout>

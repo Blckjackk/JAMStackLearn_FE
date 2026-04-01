@@ -1,0 +1,44 @@
+---
+export const prerender = true
+
+import AppLayout from "@/layouts/app.astro"
+import { ProfileForm } from "@/components/profile-form"
+import { ProfileSummary } from "@/components/profile-summary"
+---
+
+<AppLayout
+  title="Profile | Project Orbit Astro"
+  description="Halaman profile user dan ringkasan peran di project."
+  pageTitle="Profile"
+>
+  <section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+    <div class="rounded-3xl border border-slate-200 bg-white/85 p-6 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+        Identity
+      </p>
+      <h2 class="mt-2 font-serif text-2xl font-semibold text-slate-900">
+        Update profil kamu.
+      </h2>
+      <p class="mt-3 text-sm text-slate-600">
+        Kamu bisa update nama profil. Email tidak bisa diubah.
+      </p>
+      <div class="mt-6">
+        <ProfileForm client:load />
+      </div>
+    </div>
+    <div class="rounded-3xl border border-slate-200 bg-[linear-gradient(140deg,#0f172a_0%,#111827_55%,#1f2937_100%)] p-6 text-slate-100 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-200">
+        Ringkasan Project
+      </p>
+      <h3 class="mt-2 text-xl font-semibold">
+        Status project kamu saat ini.
+      </h3>
+      <p class="mt-3 text-sm text-slate-200/80">
+        Ambil data real dari backend, bukan placeholder.
+      </p>
+      <div class="mt-6">
+        <ProfileSummary client:load />
+      </div>
+    </div>
+  </section>
+</AppLayout>

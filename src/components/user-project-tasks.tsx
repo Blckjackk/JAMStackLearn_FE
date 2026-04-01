@@ -92,6 +92,7 @@ export function UserProjectTasks() {
 
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [taskMessage, setTaskMessage] = useState<string | null>(null)
+  const [taskErrors, setTaskErrors] = useState<Record<number, string>>({})
   const [taskForm, setTaskForm] = useState(initialTaskForm)
 
   const selectedProject = useMemo(
@@ -259,10 +260,10 @@ export function UserProjectTasks() {
       setTaskForm(initialTaskForm)
       setSelectedTagId(null)
       setSelectedAssigneeUserId(null)
-      setTaskMessage("Task created successfully.")
+      setTaskMessage("Task berhasil dibuat.")
       await refreshTasks(selectedProjectId)
     } catch (error) {
-      setTaskMessage(`Create task failed: ${toErrorMessage(error)}`)
+      setTaskMessage(`Gagal membuat task: ${toErrorMessage(error)}`)
     } finally {
       setCreatingTask(false)
     }
@@ -282,10 +283,23 @@ export function UserProjectTasks() {
       }
 
       await updateTask(authenticatedUser.id, taskId, payload)
-      setTaskMessage("Task updated.")
+      setTaskMessage("Task berhasil diperbarui.")
+      setTaskErrors((previous) => {
+        if (!(taskId in previous)) {
+          return previous
+        }
+
+        const next = { ...previous }
+        delete next[taskId]
+        return next
+      })
       await refreshTasks(selectedProjectId)
     } catch (error) {
-      setTaskMessage(`Update task failed: ${toErrorMessage(error)}`)
+      setTaskMessage(`Gagal memperbarui task: ${toErrorMessage(error)}`)
+      setTaskErrors((previous) => ({
+        ...previous,
+        [taskId]: toErrorMessage(error),
+      }))
     } finally {
       setUpdatingTaskId(null)
     }
@@ -298,7 +312,7 @@ export function UserProjectTasks() {
   if (checkingSession) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-6 py-10">
-        <p className="text-sm text-slate-600">Checking session...</p>
+        <p className="text-sm text-slate-600">Memeriksa sesi...</p>
       </div>
     )
   }
@@ -308,25 +322,33 @@ export function UserProjectTasks() {
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 lg:px-10 lg:py-14">
         <section className="rounded-3xl border border-slate-300/60 bg-white/85 p-6 shadow-sm backdrop-blur sm:p-8">
           <p className="text-xs font-semibold tracking-[0.24em] text-emerald-700 uppercase">
-            Project Tasks
+            Project
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            {selectedProject ? selectedProject.name : "Task Workspace"}
+            {selectedProject ? selectedProject.name : "Ruang Task"}
           </h1>
           <p className="mt-2 text-sm text-slate-600">
             Kelola task untuk project terpilih. Kembali ke dashboard untuk pilih
             project lain.
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            User code: {authenticatedUser?.userCode || "-"}
+            Kode user: {authenticatedUser?.userCode || "-"}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <a
               href="/dashboard"
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Kembali ke Project
+              Kembali ke project
             </a>
+            {selectedProjectId !== null && (
+              <a
+                href={`/projects/${selectedProjectId}/members`}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Kelola anggota
+              </a>
+            )}
             <select
               className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
               value={selectedProjectId ?? ""}
@@ -336,7 +358,7 @@ export function UserProjectTasks() {
               disabled={userProjects.length === 0 || loadingProjects}
             >
               {userProjects.length === 0 ? (
-                <option value="">No project</option>
+                <option value="">Belum ada project</option>
               ) : (
                 userProjects.map((project) => (
                   <option key={project.id} value={project.id}>
@@ -365,7 +387,7 @@ export function UserProjectTasks() {
           </article>
           <article className="rounded-2xl border border-slate-200 bg-white/85 p-5 shadow-sm">
             <p className="text-xs tracking-wider text-slate-500 uppercase">
-              Total tasks
+              Total task
             </p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {tasks.length}
@@ -389,18 +411,18 @@ export function UserProjectTasks() {
             >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-xl font-semibold text-slate-900">
-                  Create task
+                  Buat task
                 </h2>
                 <button
                   type="button"
                   onClick={() => void refreshAvailableTags()}
                   className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
                 >
-                  {loadingTags ? "Refreshing..." : "Refresh tags"}
+                  {loadingTags ? "Memuat..." : "Muat ulang tag"}
                 </button>
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-600">Task title</label>
+                <label className="text-sm text-slate-600">Judul task</label>
                 <input
                   value={taskForm.title}
                   onChange={(event) =>
@@ -414,7 +436,7 @@ export function UserProjectTasks() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-600">Content</label>
+                <label className="text-sm text-slate-600">Detail</label>
                 <textarea
                   value={taskForm.content}
                   onChange={(event) =>
@@ -429,7 +451,7 @@ export function UserProjectTasks() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-600">Assign to</label>
+                <label className="text-sm text-slate-600">Assign ke</label>
                 <select
                   value={selectedAssigneeUserId ?? ""}
                   onChange={(event) =>
@@ -440,7 +462,7 @@ export function UserProjectTasks() {
                   className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                   disabled={projectMembers.length === 0}
                 >
-                  <option value="">Unassigned</option>
+                  <option value="">Belum ditugaskan</option>
                   {projectMembers.map((member) => (
                     <option key={member.userId} value={member.userId}>
                       {member.username}
@@ -449,7 +471,7 @@ export function UserProjectTasks() {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-600">Due date</label>
+                <label className="text-sm text-slate-600">Tenggat</label>
                 <input
                   type="date"
                   value={taskForm.dueDate}
@@ -463,12 +485,10 @@ export function UserProjectTasks() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-600">Tags template</label>
+                <label className="text-sm text-slate-600">Template tag</label>
                 {availableTags.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-                    {loadingTags
-                      ? "Loading tags..."
-                      : "Belum ada template tag."}
+                    {loadingTags ? "Memuat tag..." : "Belum ada template tag."}
                   </p>
                 ) : (
                   <div className="flex flex-wrap gap-2 rounded-xl border border-slate-300 p-3">
@@ -500,7 +520,7 @@ export function UserProjectTasks() {
                 disabled={creatingTask || selectedProjectId === null}
                 className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {creatingTask ? "Creating task..." : "Create task"}
+                {creatingTask ? "Membuat task..." : "Buat task"}
               </button>
               {taskMessage && (
                 <p className="text-sm text-slate-600">{taskMessage}</p>
@@ -508,14 +528,14 @@ export function UserProjectTasks() {
             </form>
           ) : (
             <div className="rounded-3xl border border-amber-200 bg-amber-50/70 p-6 text-sm text-amber-800 shadow-sm">
-              Create task hanya untuk Project Manager.
+              Buat task hanya untuk Project Manager.
             </div>
           )}
 
           <article className="rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h3 className="text-lg font-semibold text-slate-900">
-                Task list
+                Daftar task
               </h3>
               <button
                 type="button"
@@ -525,7 +545,7 @@ export function UserProjectTasks() {
                 }
                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
               >
-                {loadingTasks ? "Refreshing..." : "Reload"}
+                {loadingTasks ? "Memuat..." : "Muat ulang"}
               </button>
             </div>
             <div className="max-h-96 overflow-auto rounded-xl border border-slate-200">
@@ -534,7 +554,7 @@ export function UserProjectTasks() {
                   <tr>
                     <th className="px-3 py-2">Task</th>
                     <th className="px-3 py-2">Status</th>
-                    <th className="px-3 py-2">Due</th>
+                    <th className="px-3 py-2">Tenggat</th>
                     <th className="px-3 py-2">Assignee</th>
                     <th className="px-3 py-2">Tag</th>
                   </tr>
@@ -542,8 +562,10 @@ export function UserProjectTasks() {
                 <tbody>
                   {tasks.length === 0 ? (
                     <tr>
-                      <td className="px-3 py-3 text-slate-500" colSpan={5}>
-                        {loadingTasks ? "Loading tasks..." : "Belum ada task."}
+                      <td className="px-3 py-4 text-slate-500" colSpan={5}>
+                        {loadingTasks
+                          ? "Memuat task..."
+                          : "Belum ada task. Buat task baru di panel kiri."}
                       </td>
                     </tr>
                   ) : (
@@ -554,6 +576,11 @@ export function UserProjectTasks() {
                       >
                         <td className="px-3 py-2 font-medium text-slate-900">
                           {task.title}
+                          {taskErrors[task.id] && (
+                            <p className="mt-1 text-xs text-rose-600">
+                              {taskErrors[task.id]}
+                            </p>
+                          )}
                         </td>
                         <td className="px-3 py-2 text-slate-600">
                           <select
@@ -576,13 +603,18 @@ export function UserProjectTasks() {
                         <td className="px-3 py-2 text-slate-600">
                           <select
                             value={task.assigneeUserId ?? ""}
-                            onChange={(event) =>
+                            onChange={(event) => {
+                              if (!event.target.value) {
+                                void handleUpdateTask(task.id, {
+                                  clearAssignee: true,
+                                })
+                                return
+                              }
+
                               void handleUpdateTask(task.id, {
-                                assigneeUserId: event.target.value
-                                  ? Number(event.target.value)
-                                  : undefined,
+                                assigneeUserId: Number(event.target.value),
                               })
-                            }
+                            }}
                             disabled={
                               !isProjectManager || updatingTaskId === task.id
                             }

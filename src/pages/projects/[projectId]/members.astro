@@ -1,0 +1,25 @@
+---
+export const prerender = false
+
+import AppLayout from "@/layouts/app.astro"
+import { UserProjectMembers } from "@/components/user-project-members"
+
+const { projectId } = Astro.params
+const parsedProjectId = projectId ? Number(projectId) : NaN
+---
+
+<AppLayout
+  title={`Anggota Project ${projectId ?? ""} | Project Orbit Astro`}
+  description="Halaman anggota project dan undangan."
+  pageTitle="Anggota"
+>
+  {
+    Number.isNaN(parsedProjectId) ? (
+      <div class="rounded-3xl border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700">
+        Project ID tidak valid.
+      </div>
+    ) : (
+      <UserProjectMembers client:load projectId={parsedProjectId} />
+    )
+  }
+</AppLayout>

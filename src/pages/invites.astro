@@ -1,0 +1,14 @@
+---
+export const prerender = true
+
+import AppLayout from "@/layouts/app.astro"
+import { UserProjectInvites } from "@/components/user-project-invites"
+---
+
+<AppLayout
+  title="Undangan | Project Orbit Astro"
+  description="Halaman undangan masuk project untuk user yang login."
+  pageTitle="Undangan"
+>
+  <UserProjectInvites client:load />
+</AppLayout>

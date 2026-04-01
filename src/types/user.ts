@@ -15,3 +15,7 @@ export type LoginUserInput = {
   email: string
   password: string
 }
+
+export type UpdateUserProfileInput = {
+  username: string
+}

@@ -1,4 +1,4 @@
-import type { CreateUserInput, LoginUserInput, User } from "@/types"
+import type { CreateUserInput, LoginUserInput, UpdateUserProfileInput, User } from "@/types"
 import { apiFetch } from "./api"
 
 type FirebaseLoginResponse = {
@@ -33,6 +33,19 @@ export async function createUser(payload: CreateUserInput): Promise<User> {
 export async function loginUser(payload: LoginUserInput): Promise<User> {
   return apiFetch<User>("user/login", {
     method: "POST",
+    body: payload,
+  })
+}
+
+export async function updateUserProfile(
+  userId: number,
+  payload: UpdateUserProfileInput
+): Promise<User> {
+  return apiFetch<User>("user/profile", {
+    method: "PUT",
+    headers: {
+      "X-User-Id": String(userId),
+    },
     body: payload,
   })
 }

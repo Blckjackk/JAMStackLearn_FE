@@ -1,13 +1,14 @@
 ---
 export const prerender = true
 
-import MainLayout from "@/layouts/main.astro"
+import AppLayout from "@/layouts/app.astro"
 import { UserProjectTasks } from "@/components/user-project-tasks"
 ---
 
-<MainLayout
-  title="Tasks | Project Orbit Astro"
-  description="Halaman task untuk project terpilih milik user yang login."
+<AppLayout
+  title="Project | Project Orbit Astro"
+  description="Halaman project untuk task dan anggota yang login."
+  pageTitle="Project"
 >
   <UserProjectTasks client:load />
-</MainLayout>
+</AppLayout>

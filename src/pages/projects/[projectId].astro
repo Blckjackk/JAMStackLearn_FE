@@ -1,0 +1,57 @@
+---
+export const prerender = false
+
+import AppLayout from "@/layouts/app.astro"
+
+const { projectId } = Astro.params
+const projectLabel = projectId ?? "unknown"
+---
+
+<AppLayout
+  title={`Project ${projectLabel} | Project Orbit Astro`}
+  description="Detail project dan jobdesk per anggota."
+  pageTitle={`Project ${projectLabel}`}
+>
+  <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <div class="rounded-3xl border border-slate-200 bg-white/85 p-6 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+        Detail Project
+      </p>
+      <h2 class="mt-2 font-serif text-2xl font-semibold text-slate-900">
+        Project ID: {projectLabel}
+      </h2>
+      <p class="mt-3 text-sm text-slate-600">
+        Halaman ini disiapkan untuk menampilkan data project, anggota, dan role
+        yang terlibat.
+      </p>
+      <div class="mt-6 grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+          Status: active
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+          Role kamu: pending
+        </div>
+      </div>
+      <a
+        href={`/tasks?projectId=${projectLabel}`}
+        class="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:shadow-md"
+      >
+        Lihat Jobdesk Project
+      </a>
+    </div>
+    <div class="rounded-3xl border border-amber-200 bg-[linear-gradient(160deg,#fff7ed_0%,#fffbeb_45%,#fef3c7_100%)] p-6 text-slate-700 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
+        Next Step
+      </p>
+      <h3 class="mt-2 text-xl font-semibold">
+        Integrasikan API project detail.
+      </h3>
+      <p class="mt-3 text-sm text-amber-900/70">
+        Ambil data project dan member untuk menampilkan jobdesk per role.
+      </p>
+      <div class="mt-6 rounded-2xl border border-amber-200/70 bg-white/70 px-4 py-3 text-xs text-amber-900/70">
+        Rekomendasi: tampilkan daftar member + role.
+      </div>
+    </div>
+  </section>
+</AppLayout>

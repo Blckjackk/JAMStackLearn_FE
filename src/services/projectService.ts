@@ -62,3 +62,15 @@ export async function acceptInvite(
     },
   })
 }
+
+export async function rejectInvite(
+  inviteId: number,
+  actorUserId: number
+): Promise<ProjectInvite> {
+  return apiFetch<ProjectInvite>(`project/invites/${inviteId}/reject`, {
+    method: "POST",
+    headers: {
+      "X-User-Id": actorUserId.toString(),
+    },
+  })
+}
