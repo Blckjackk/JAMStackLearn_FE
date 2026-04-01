@@ -211,7 +211,7 @@ export default function AppShell({ pageTitle, children }: AppShellProps) {
             <div className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
               <p>Fokus ke project aktif dan jobdesk harian.</p>
               {isAdmin ? (
-                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-amber-800">
+                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-2 py-0.5 text-[0.6rem] font-semibold tracking-[0.25em] text-amber-800 uppercase">
                   Mode Admin
                 </div>
               ) : null}
