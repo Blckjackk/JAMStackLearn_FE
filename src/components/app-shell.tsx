@@ -17,12 +17,13 @@ import {
 } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { HeaderActions } from "@/components/header-actions"
+import { getSessionUser } from "@/lib/authSession"
 
 type NavItem = {
   label: string
   href: string
   description: string
-  icon: "dashboard" | "projects" | "invites" | "profile"
+  icon: "dashboard" | "projects" | "invites" | "profile" | "admin" | "users"
 }
 
 type AppShellProps = {
@@ -54,6 +55,27 @@ const navItems: NavItem[] = [
     href: "/profile",
     description: "Data akun dan peran kamu.",
     icon: "profile",
+  },
+]
+
+const adminNavItems: NavItem[] = [
+  {
+    label: "Admin",
+    href: "/admin",
+    description: "Ringkasan kontrol admin.",
+    icon: "admin",
+  },
+  {
+    label: "User",
+    href: "/admin/users",
+    description: "Kelola user developer.",
+    icon: "users",
+  },
+  {
+    label: "Project",
+    href: "/admin/projects",
+    description: "Pantau semua project.",
+    icon: "projects",
   },
 ]
 
@@ -97,6 +119,26 @@ function NavIcon({ name }: { name: NavItem["icon"] }) {
     )
   }
 
+  if (name === "admin") {
+    return (
+      <svg {...commonProps} aria-hidden="true">
+        <path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4z" />
+        <path d="M9.5 12.5l2 2 3-3" />
+      </svg>
+    )
+  }
+
+  if (name === "users") {
+    return (
+      <svg {...commonProps} aria-hidden="true">
+        <circle cx="9" cy="8" r="3" />
+        <circle cx="16.5" cy="9.5" r="2.5" />
+        <path d="M3.5 20c1.4-3 3.8-4.5 6.5-4.5" />
+        <path d="M12 20c.6-1.8 2.1-3.2 4.5-3.2 1 0 2 .2 3 .7" />
+      </svg>
+    )
+  }
+
   return (
     <svg {...commonProps} aria-hidden="true">
       <circle cx="12" cy="8" r="3.5" />
@@ -107,10 +149,15 @@ function NavIcon({ name }: { name: NavItem["icon"] }) {
 
 export default function AppShell({ pageTitle, children }: AppShellProps) {
   const [pathname, setPathname] = useState("")
+  const [userRole, setUserRole] = useState("")
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPathname(window.location.pathname)
+    const sessionUser = getSessionUser()
+    if (sessionUser) {
+      setUserRole(sessionUser.role)
+    }
   }, [])
 
   const currentTitle = useMemo(() => {
@@ -121,6 +168,8 @@ export default function AppShell({ pageTitle, children }: AppShellProps) {
     const match = navItems.find((item) => pathname.startsWith(item.href))
     return match?.label ?? "Workspace"
   }, [pageTitle, pathname])
+
+  const isAdmin = userRole.toLowerCase() === "admin"
 
   return (
     <TooltipProvider>
@@ -159,13 +208,51 @@ export default function AppShell({ pageTitle, children }: AppShellProps) {
                 </div>
               </div>
             </div>
-            <p className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-              Fokus ke project aktif dan jobdesk harian.
-            </p>
+            <div className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+              <p>Fokus ke project aktif dan jobdesk harian.</p>
+              {isAdmin ? (
+                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-amber-800">
+                  Mode Admin
+                </div>
+              ) : null}
+            </div>
           </SidebarHeader>
           <SidebarContent>
+            {isAdmin ? (
+              <SidebarGroup>
+                <SidebarGroupLabel>Admin Workspace</SidebarGroupLabel>
+                <SidebarMenu>
+                  {adminNavItems.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={
+                          pathname === item.href ||
+                          pathname.startsWith(item.href + "/")
+                        }
+                        tooltip={item.description}
+                      >
+                        <a href={item.href}>
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-accent-foreground group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
+                            <NavIcon name={item.icon} />
+                          </span>
+                          <span className="truncate group-data-[collapsible=icon]:hidden">
+                            {item.label}
+                          </span>
+                          <span className="ml-auto text-[0.65rem] tracking-[0.2em] text-sidebar-foreground/50 uppercase group-data-[collapsible=icon]:hidden">
+                            Go
+                          </span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            ) : null}
             <SidebarGroup>
-              <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
+              <SidebarGroupLabel>
+                {isAdmin ? "Tim & Project" : "Menu Utama"}
+              </SidebarGroupLabel>
               <SidebarMenu>
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
@@ -204,10 +291,9 @@ export default function AppShell({ pageTitle, children }: AppShellProps) {
           </SidebarFooter>
         </Sidebar>
         <SidebarRail />
-        <SidebarInset className="relative overflow-hidden bg-white/85 md:m-3 md:rounded-[28px] md:border md:border-slate-200/70 md:shadow-[0_24px_60px_rgba(15,23,42,0.16)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(15,118,110,0.1),transparent_44%),radial-gradient(circle_at_82%_12%,rgba(14,116,144,0.12),transparent_40%)]" />
-          <header className="sticky top-0 z-10 border-b border-slate-200/70 bg-white/80 backdrop-blur">
-            <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-6 py-4">
+        <SidebarInset className="relative overflow-hidden border-l border-slate-200/70 bg-white">
+          <header className="sticky top-0 z-10 border-b border-slate-200/70 bg-white/95 backdrop-blur">
+            <div className="flex w-full items-center gap-3 px-4 py-4">
               <SidebarTrigger />
               <div className="flex-1">
                 <p className="text-[0.65rem] font-semibold tracking-[0.35em] text-slate-500 uppercase">
@@ -217,13 +303,13 @@ export default function AppShell({ pageTitle, children }: AppShellProps) {
                   {currentTitle}
                 </h1>
               </div>
-              <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-xs font-medium text-slate-600 md:flex">
+              <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 md:flex">
                 Diperbarui hari ini
               </div>
               <HeaderActions />
             </div>
           </header>
-          <div className="relative flex-1 animate-in px-6 py-6 fade-in slide-in-from-bottom-2">
+          <div className="relative flex-1 animate-in px-4 py-5 fade-in slide-in-from-bottom-2">
             {children}
           </div>
         </SidebarInset>

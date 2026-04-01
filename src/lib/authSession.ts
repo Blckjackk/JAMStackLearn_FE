@@ -33,6 +33,7 @@ export function getSessionUser(): User | null {
     return {
       ...parsed,
       userCode: typeof parsed.userCode === "string" ? parsed.userCode : "",
+      role: typeof parsed.role === "string" ? parsed.role : "Developer",
     }
   } catch {
     return null

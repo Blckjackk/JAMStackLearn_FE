@@ -3,6 +3,7 @@ export type User = {
   username: string
   email: string
   userCode: string
+  role: string
 }
 
 export type CreateUserInput = {

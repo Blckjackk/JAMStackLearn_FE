@@ -1,0 +1,14 @@
+---
+export const prerender = true
+
+import AppLayout from "@/layouts/app.astro"
+import { AdminDashboard } from "@/components/admin-dashboard"
+---
+
+<AppLayout
+  title="Admin | Project Orbit Astro"
+  description="Dashboard admin untuk monitoring workspace."
+  pageTitle="Admin"
+>
+  <AdminDashboard client:load />
+</AppLayout>

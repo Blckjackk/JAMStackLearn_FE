@@ -58,6 +58,7 @@ export function UserProjectInvites() {
         setAuthenticatedUser({
           ...freshUser,
           userCode: sessionUser.userCode || freshUser.userCode || "",
+          role: sessionUser.role || freshUser.role || "Developer",
         })
       } catch {
         clearSessionUser()

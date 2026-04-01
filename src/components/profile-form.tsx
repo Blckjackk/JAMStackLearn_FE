@@ -47,7 +47,8 @@ export function ProfileForm() {
       saveSessionUser(updated)
       setStatus("Profil berhasil diperbarui.")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Gagal update profile."
+      const message =
+        err instanceof Error ? err.message : "Gagal update profile."
       setError(message)
     } finally {
       setIsSaving(false)
@@ -57,18 +58,18 @@ export function ProfileForm() {
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       <div className="grid gap-2">
-        <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+        <label className="text-xs font-semibold tracking-[0.28em] text-slate-500 uppercase">
           Nama
         </label>
         <input
           value={username}
           onChange={(event) => setUsername(event.target.value)}
           placeholder="Nama kamu"
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-400"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition outline-none focus:border-slate-400"
         />
       </div>
       <div className="grid gap-2">
-        <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+        <label className="text-xs font-semibold tracking-[0.28em] text-slate-500 uppercase">
           Email
         </label>
         <input

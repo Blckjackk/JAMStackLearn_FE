@@ -1,4 +1,9 @@
-import type { CreateUserInput, LoginUserInput, UpdateUserProfileInput, User } from "@/types"
+import type {
+  CreateUserInput,
+  LoginUserInput,
+  UpdateUserProfileInput,
+  User,
+} from "@/types"
 import { apiFetch } from "./api"
 
 type FirebaseLoginResponse = {
@@ -10,6 +15,7 @@ type FirebaseLoginResponse = {
     email: string
     name?: string
     userCode?: string
+    role?: string
   }
 }
 
@@ -66,6 +72,7 @@ export async function loginWithFirebase(token: string): Promise<User> {
       username: response.user.name || response.user.email.split("@")[0],
       email: response.user.email,
       userCode: response.user.userCode || "",
+      role: response.user.role || "Developer",
     }
   }
 
@@ -74,5 +81,6 @@ export async function loginWithFirebase(token: string): Promise<User> {
     username: response.username,
     email: response.email,
     userCode: response.userCode || "",
+    role: response.role || "Developer",
   }
 }

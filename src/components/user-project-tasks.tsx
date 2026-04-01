@@ -109,6 +109,13 @@ export function UserProjectTasks() {
     return selectedProject.userRole.toLowerCase().includes("project manager")
   }, [selectedProject])
 
+  const isAdmin = useMemo(() => {
+    if (!authenticatedUser) {
+      return false
+    }
+    return authenticatedUser.role.toLowerCase() === "admin"
+  }, [authenticatedUser])
+
   const projectMembers = useMemo(() => {
     return selectedProject?.members ?? []
   }, [selectedProject])
@@ -189,6 +196,7 @@ export function UserProjectTasks() {
         setAuthenticatedUser({
           ...freshUser,
           userCode: sessionUser.userCode || freshUser.userCode || "",
+          role: sessionUser.role || freshUser.role || "Developer",
         })
       } catch {
         window.location.href = "/login"
@@ -404,7 +412,7 @@ export function UserProjectTasks() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          {isProjectManager ? (
+          {isProjectManager || isAdmin ? (
             <form
               onSubmit={handleCreateTask}
               className="space-y-4 rounded-3xl border border-slate-300/60 bg-white p-6 shadow-sm"
