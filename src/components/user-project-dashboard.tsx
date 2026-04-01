@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { clearSessionUser, getSessionUser } from "@/lib/authSession"
+import { auth } from "@/lib/firebase"
 import {
   acceptInvite,
   createProject,
@@ -8,7 +9,9 @@ import {
   getPendingInvites,
   getProjects,
 } from "@/services/projectService"
+import { getUser } from "@/services/userService"
 import type { CreateProjectInput, Project, ProjectInvite, User } from "@/types"
+import { signOut } from "firebase/auth"
 
 const initialProjectForm: CreateProjectInput = {
   name: "",
@@ -98,14 +101,41 @@ export function UserProjectDashboard() {
   }, [])
 
   useEffect(() => {
-    const sessionUser = getSessionUser()
-    if (!sessionUser) {
-      window.location.href = "/login"
-      return
+    let isActive = true
+
+    async function verifySession() {
+      const sessionUser = getSessionUser()
+      if (!sessionUser) {
+        window.location.href = "/login"
+        return
+      }
+
+      try {
+        const freshUser = await getUser(sessionUser.id)
+        if (!isActive) {
+          return
+        }
+
+        setAuthenticatedUser({
+          ...freshUser,
+          userCode: sessionUser.userCode || freshUser.userCode || "",
+        })
+      } catch {
+        clearSessionUser()
+        window.location.href = "/login"
+        return
+      } finally {
+        if (isActive) {
+          setCheckingSession(false)
+        }
+      }
     }
 
-    setAuthenticatedUser(sessionUser)
-    setCheckingSession(false)
+    void verifySession()
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
   useEffect(() => {
@@ -193,8 +223,13 @@ export function UserProjectDashboard() {
     }
   }
 
-  function handleLogout() {
+  async function handleLogout() {
     clearSessionUser()
+    try {
+      await signOut(auth)
+    } catch {
+      // Ignore Firebase logout errors and still redirect.
+    }
     window.location.href = "/login"
   }
 

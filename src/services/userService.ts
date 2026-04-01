@@ -3,15 +3,17 @@ import { apiFetch } from "./api"
 
 type FirebaseLoginResponse = {
   success: boolean
-  message: string
+  message?: string
   user?: {
     id: number
-    firebaseUid: string
+    firebaseUid?: string
     email: string
-    name: string
-    userCode: string
+    name?: string
+    userCode?: string
   }
 }
+
+type FirebaseLoginPayload = FirebaseLoginResponse | User
 
 export async function getUsers(): Promise<User[]> {
   return apiFetch<User[]>("user")
@@ -36,19 +38,28 @@ export async function loginUser(payload: LoginUserInput): Promise<User> {
 }
 
 export async function loginWithFirebase(token: string): Promise<User> {
-  const response = await apiFetch<FirebaseLoginResponse>("auth/firebase", {
+  const response = await apiFetch<FirebaseLoginPayload>("auth/firebase", {
     method: "POST",
     body: { token },
   })
 
-  if (!response.success || !response.user) {
-    throw new Error(response.message || "Firebase login failed.")
+  if ("success" in response) {
+    if (!response.success || !response.user) {
+      throw new Error(response.message || "Firebase login failed.")
+    }
+
+    return {
+      id: response.user.id,
+      username: response.user.name || response.user.email.split("@")[0],
+      email: response.user.email,
+      userCode: response.user.userCode || "",
+    }
   }
 
   return {
-    id: response.user.id,
-    username: response.user.name || response.user.email.split("@")[0],
-    email: response.user.email,
-    userCode: response.user.userCode,
+    id: response.id,
+    username: response.username,
+    email: response.email,
+    userCode: response.userCode || "",
   }
 }

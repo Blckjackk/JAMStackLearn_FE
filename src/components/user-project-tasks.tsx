@@ -8,6 +8,7 @@ import {
   getTasksByProject,
   updateTask,
 } from "@/services/taskService"
+import { getUser } from "@/services/userService"
 import type {
   CreateTaskInput,
   Project,
@@ -169,14 +170,40 @@ export function UserProjectTasks() {
   }, [])
 
   useEffect(() => {
-    const sessionUser = getSessionUser()
-    if (!sessionUser) {
-      window.location.href = "/login"
-      return
+    let isActive = true
+
+    async function verifySession() {
+      const sessionUser = getSessionUser()
+      if (!sessionUser) {
+        window.location.href = "/login"
+        return
+      }
+
+      try {
+        const freshUser = await getUser(sessionUser.id)
+        if (!isActive) {
+          return
+        }
+
+        setAuthenticatedUser({
+          ...freshUser,
+          userCode: sessionUser.userCode || freshUser.userCode || "",
+        })
+      } catch {
+        window.location.href = "/login"
+        return
+      } finally {
+        if (isActive) {
+          setCheckingSession(false)
+        }
+      }
     }
 
-    setAuthenticatedUser(sessionUser)
-    setCheckingSession(false)
+    void verifySession()
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
   useEffect(() => {
