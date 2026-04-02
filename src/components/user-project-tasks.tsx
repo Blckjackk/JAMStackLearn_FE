@@ -198,9 +198,15 @@ export function UserProjectTasks() {
           userCode: sessionUser.userCode || freshUser.userCode || "",
           role: sessionUser.role || freshUser.role || "Developer",
         })
-      } catch {
-        window.location.href = "/login"
-        return
+      } catch (error) {
+        if (!isActive) {
+          return
+        }
+
+        setAuthenticatedUser(sessionUser)
+        setGlobalError(
+          `Sesi lokal dipakai sementara karena backend tidak bisa diverifikasi: ${toErrorMessage(error)}`
+        )
       } finally {
         if (isActive) {
           setCheckingSession(false)

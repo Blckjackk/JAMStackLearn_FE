@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { clearSessionUser, getSessionUser } from "@/lib/authSession"
+import { getSessionUser } from "@/lib/authSession"
 import { createProject, getProjects } from "@/services/projectService"
 import { getUser } from "@/services/userService"
 import type { CreateProjectInput, Project, User } from "@/types"
@@ -80,10 +80,15 @@ export function UserProjectDashboard() {
           userCode: sessionUser.userCode || freshUser.userCode || "",
           role: sessionUser.role || freshUser.role || "Developer",
         })
-      } catch {
-        clearSessionUser()
-        window.location.href = "/login"
-        return
+      } catch (error) {
+        if (!isActive) {
+          return
+        }
+
+        setAuthenticatedUser(sessionUser)
+        setGlobalError(
+          `Sesi lokal ditemukan, tapi backend tidak bisa diverifikasi: ${toErrorMessage(error)}`
+        )
       } finally {
         if (isActive) {
           setCheckingSession(false)

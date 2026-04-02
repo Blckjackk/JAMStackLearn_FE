@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { clearSessionUser, getSessionUser } from "@/lib/authSession"
+import { getSessionUser } from "@/lib/authSession"
 import {
   acceptInvite,
   getPendingInvites,
@@ -60,10 +60,15 @@ export function UserProjectInvites() {
           userCode: sessionUser.userCode || freshUser.userCode || "",
           role: sessionUser.role || freshUser.role || "Developer",
         })
-      } catch {
-        clearSessionUser()
-        window.location.href = "/login"
-        return
+      } catch (error) {
+        if (!isActive) {
+          return
+        }
+
+        setAuthenticatedUser(sessionUser)
+        setInviteMessage(
+          `Sesi lokal dipakai sementara karena backend tidak bisa diverifikasi: ${toErrorMessage(error)}`
+        )
       } finally {
         if (isActive) {
           setCheckingSession(false)
