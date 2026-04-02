@@ -42,8 +42,16 @@ export function UserProjectMembers({ projectId }: UserProjectMembersProps) {
   const [sendingInvite, setSendingInvite] = useState(false)
 
   const isProjectManager = useMemo(() => {
-    return project?.userRole?.toLowerCase().includes("project manager") ?? false
-  }, [project])
+    if (!authenticatedUser) {
+      return false
+    }
+
+    const membership = members.find(
+      (member) => member.userId === authenticatedUser.id
+    )
+
+    return membership?.role?.toLowerCase().includes("project manager") ?? false
+  }, [authenticatedUser, members])
 
   useEffect(() => {
     let isActive = true
