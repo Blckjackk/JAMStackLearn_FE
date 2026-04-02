@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:5156/api"
+const IS_NGROK_API = /\.ngrok-free\.dev/i.test(API_URL)
 
 type ApiInit = Omit<RequestInit, "body"> & {
   body?: unknown
@@ -13,6 +14,10 @@ export async function apiFetch<T>(
   const headers = new Headers(init?.headers)
   if (!headers.has("Accept")) {
     headers.set("Accept", "application/json")
+  }
+
+  if (IS_NGROK_API && !headers.has("ngrok-skip-browser-warning")) {
+    headers.set("ngrok-skip-browser-warning", "true")
   }
 
   let body: BodyInit | undefined
