@@ -34,6 +34,8 @@ export function getSessionUser(): User | null {
       ...parsed,
       userCode: typeof parsed.userCode === "string" ? parsed.userCode : "",
       role: typeof parsed.role === "string" ? parsed.role : "Developer",
+      phoneNumber: typeof parsed.phoneNumber === "string" ? parsed.phoneNumber : "",
+      isOtpVerified: typeof parsed.isOtpVerified === "boolean" ? parsed.isOtpVerified : false,
     }
   } catch {
     return null

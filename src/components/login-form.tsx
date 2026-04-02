@@ -5,6 +5,7 @@ import { saveSessionUser } from "@/lib/authSession"
 import { auth } from "@/lib/firebase"
 import { loginWithFirebase } from "@/services/userService"
 import { sendOtp, verifyOtp } from "@/services/otpService"
+import type { User } from "@/types"
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -27,6 +28,7 @@ export function LoginForm() {
   const [verifyingOtp, setVerifyingOtp] = useState(false)
   const [resendSeconds, setResendSeconds] = useState(0)
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
+  const [pendingUser, setPendingUser] = useState<User | null>(null)
 
   const normalizedPhone = useMemo(() => {
     const digits = phoneInput.replace(/\D/g, "")
@@ -55,6 +57,10 @@ export function LoginForm() {
   async function handleGoogleLogin() {
     setLoading(true)
     setMessage(null)
+    setOtpMessage(null)
+    setPendingUser(null)
+    setOtpStep("phone")
+    setResendSeconds(0)
 
     try {
       const provider = new GoogleAuthProvider()
@@ -62,9 +68,16 @@ export function LoginForm() {
       const token = await result.user.getIdToken()
 
       const user = await loginWithFirebase(token)
-      saveSessionUser(user)
-      setMessage(`Login berhasil. Selamat datang, ${user.username}.`)
-      window.location.href = "/dashboard"
+      if (user.isOtpVerified) {
+        saveSessionUser(user)
+        setMessage(`Login berhasil. Selamat datang, ${user.username}.`)
+        window.location.href = "/dashboard"
+        return
+      }
+
+      setPendingUser(user)
+      setPhoneInput(user.phoneNumber || "")
+      setMessage("Akun belum terverifikasi. Lanjutkan OTP dulu.")
     } catch (error) {
       setMessage(`Login gagal: ${toErrorMessage(error)}`)
     } finally {
@@ -73,6 +86,11 @@ export function LoginForm() {
   }
 
   async function handleSendOtp() {
+    if (!pendingUser) {
+      setOtpMessage("Login Google dulu untuk aktivasi OTP.")
+      return
+    }
+
     if (!isPhoneValid) {
       setOtpMessage("Nomor HP belum valid.")
       return
@@ -95,6 +113,11 @@ export function LoginForm() {
   }
 
   async function handleVerifyOtp() {
+    if (!pendingUser) {
+      setOtpMessage("Login Google dulu untuk aktivasi OTP.")
+      return
+    }
+
     const code = otpDigits.join("")
     if (code.length < 6) {
       setOtpMessage("Lengkapi 6 digit OTP dulu.")
@@ -105,7 +128,14 @@ export function LoginForm() {
     setVerifyingOtp(true)
 
     try {
-      await verifyOtp(normalizedPhone, code)
+      const response = await verifyOtp(normalizedPhone, code, pendingUser.id)
+      if (response.user) {
+        saveSessionUser(response.user)
+        setOtpMessage("OTP valid. Login berhasil.")
+        window.location.href = "/dashboard"
+        return
+      }
+
       setOtpMessage("OTP valid. Silakan lanjutkan.")
     } catch (error) {
       setOtpMessage(`OTP gagal: ${toErrorMessage(error)}`)
@@ -191,6 +221,11 @@ export function LoginForm() {
           <span className="h-px flex-1 bg-slate-200" />
         </div>
         <div className="mt-5 space-y-4">
+          {!pendingUser ? (
+            <p className="text-xs text-slate-500">
+              Login Google dulu untuk mengaktifkan verifikasi OTP.
+            </p>
+          ) : null}
           {otpStep === "phone" ? (
             <div className="space-y-3">
               <label className="text-xs font-semibold text-slate-500 uppercase">
@@ -211,7 +246,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => void handleSendOtp()}
-                disabled={sendingOtp}
+                disabled={sendingOtp || !pendingUser}
                 className="flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {sendingOtp ? "Mengirim OTP..." : "Kirim OTP"}

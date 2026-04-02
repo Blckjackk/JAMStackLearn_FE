@@ -4,6 +4,8 @@ export type User = {
   email: string
   userCode: string
   role: string
+  phoneNumber?: string
+  isOtpVerified: boolean
 }
 
 export type CreateUserInput = {

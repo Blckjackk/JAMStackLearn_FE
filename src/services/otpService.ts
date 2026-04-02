@@ -1,4 +1,5 @@
 import { apiFetch } from "./api"
+import type { User } from "@/types"
 
 type OtpSendResponse = {
   message: string
@@ -7,6 +8,7 @@ type OtpSendResponse = {
 
 type OtpVerifyResponse = {
   message: string
+  user?: User
 }
 
 export async function sendOtp(phoneNumber: string): Promise<OtpSendResponse> {
@@ -18,10 +20,11 @@ export async function sendOtp(phoneNumber: string): Promise<OtpSendResponse> {
 
 export async function verifyOtp(
   phoneNumber: string,
-  code: string
+  code: string,
+  userId?: number
 ): Promise<OtpVerifyResponse> {
   return apiFetch<OtpVerifyResponse>("otp/verify", {
     method: "POST",
-    body: { phoneNumber, code },
+    body: { phoneNumber, code, userId },
   })
 }

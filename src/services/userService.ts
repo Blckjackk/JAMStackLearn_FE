@@ -16,6 +16,8 @@ type FirebaseLoginResponse = {
     name?: string
     userCode?: string
     role?: string
+    phoneNumber?: string
+    isOtpVerified?: boolean
   }
 }
 
@@ -73,6 +75,8 @@ export async function loginWithFirebase(token: string): Promise<User> {
       email: response.user.email,
       userCode: response.user.userCode || "",
       role: response.user.role || "Developer",
+      phoneNumber: response.user.phoneNumber || "",
+      isOtpVerified: response.user.isOtpVerified ?? false,
     }
   }
 
@@ -82,5 +86,7 @@ export async function loginWithFirebase(token: string): Promise<User> {
     email: response.email,
     userCode: response.userCode || "",
     role: response.role || "Developer",
+    phoneNumber: response.phoneNumber || "",
+    isOtpVerified: response.isOtpVerified ?? false,
   }
 }
