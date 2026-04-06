@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 
-import { clearPendingSessionUser, getPendingSessionUser, saveSessionUser } from "@/lib/authSession"
+import {
+  clearPendingSessionUser,
+  getPendingSessionUser,
+  saveSessionUser,
+} from "@/lib/authSession"
 import { sendOtp, verifyOtp } from "@/services/otpService"
 import type { User } from "@/types"
 
@@ -176,13 +180,13 @@ export function OtpVerificationForm() {
   if (loading) {
     return (
       <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8">
-        <div className="w-full max-w-6xl grid gap-0 md:grid-cols-2 rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl">
+        <div className="grid w-full max-w-6xl gap-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
           <div className="hidden md:flex md:items-center md:justify-center md:bg-gradient-to-br md:from-slate-100 md:to-slate-200">
             <div className="text-center text-slate-600">
               <p className="text-sm font-medium">Loading...</p>
             </div>
           </div>
-          <div className="flex items-center justify-center p-6 sm:p-8 md:p-10 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-center justify-center bg-white/95 p-6 backdrop-blur-sm sm:p-8 md:p-10">
             <p className="text-sm text-slate-600">Memuat data...</p>
           </div>
         </div>
@@ -193,13 +197,13 @@ export function OtpVerificationForm() {
   if (!pendingUser) {
     return (
       <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8">
-        <div className="w-full max-w-6xl grid gap-0 md:grid-cols-2 rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl">
+        <div className="grid w-full max-w-6xl gap-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
           <div className="hidden md:flex md:items-center md:justify-center md:bg-gradient-to-br md:from-red-50 md:to-red-100">
             <div className="text-center">
-              <p className="text-red-600 font-semibold">Session Expired</p>
+              <p className="font-semibold text-red-600">Session Expired</p>
             </div>
           </div>
-          <div className="flex items-center justify-center p-6 sm:p-8 md:p-10 bg-white/95 backdrop-blur-sm">
+          <div className="flex items-center justify-center bg-white/95 p-6 backdrop-blur-sm sm:p-8 md:p-10">
             <div className="w-full max-w-sm space-y-4">
               <p className="text-sm font-medium text-red-600">
                 Session telah expired. Silakan login ulang.
@@ -220,13 +224,13 @@ export function OtpVerificationForm() {
 
   return (
     <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8">
-      <div className="w-full max-w-6xl grid gap-0 md:grid-cols-2 rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl">
+      <div className="grid w-full max-w-6xl gap-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
         {/* Left Side - Image */}
-        <div className="hidden md:flex md:items-center md:justify-center md:bg-gradient-to-br md:from-slate-50 md:to-slate-100 md:relative">
+        <div className="hidden md:relative md:flex md:items-center md:justify-center md:bg-gradient-to-br md:from-slate-50 md:to-slate-100">
           <img
             src="/auth-hero.jpg"
             alt="OTP verification illustration"
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
             loading="lazy"
             decoding="async"
           />
@@ -235,23 +239,26 @@ export function OtpVerificationForm() {
         </div>
 
         {/* Right Side - Form */}
-        <div className="flex items-center justify-center p-6 sm:p-8 md:p-10 bg-white/95 backdrop-blur-sm">
+        <div className="flex items-center justify-center bg-white/95 p-6 backdrop-blur-sm sm:p-8 md:p-10">
           <div className="w-full max-w-sm">
-            <div className="space-y-2 mb-8">
+            <div className="mb-8 space-y-2">
               <p className="text-xs font-semibold tracking-[0.24em] text-emerald-600 uppercase">
                 OTP Verification
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900">
                 Verifikasi Akun
               </h1>
-              <p className="text-sm leading-6 text-slate-600 pt-2">
-                Masukkan nomor WhatsApp dan kode OTP untuk menyelesaikan verifikasi.
+              <p className="pt-2 text-sm leading-6 text-slate-600">
+                Masukkan nomor WhatsApp dan kode OTP untuk menyelesaikan
+                verifikasi.
               </p>
             </div>
 
             {/* User Info Card */}
-            <div className="mb-6 rounded-xl bg-gradient-to-r from-sky-50 to-emerald-50 p-4 border border-sky-200/50">
-              <p className="text-sm font-bold text-slate-900">{pendingUser.username}</p>
+            <div className="mb-6 rounded-xl border border-sky-200/50 bg-gradient-to-r from-sky-50 to-emerald-50 p-4">
+              <p className="text-sm font-bold text-slate-900">
+                {pendingUser.username}
+              </p>
               <p className="text-xs text-slate-600">{pendingUser.email}</p>
             </div>
 
@@ -260,9 +267,9 @@ export function OtpVerificationForm() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-700 uppercase">
-                      📱 Nomor WhatsApp
+                      Nomor WhatsApp
                     </label>
-                    <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 transition">
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 transition focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20">
                       <span className="text-sm font-semibold text-slate-600">
                         +62
                       </span>
@@ -284,7 +291,7 @@ export function OtpVerificationForm() {
                     disabled={sendingOtp || !isPhoneValid}
                     className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-sky-700 active:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span>{sendingOtp ? "Mengirim..." : "📨 Kirim OTP"}</span>
+                    <span>{sendingOtp ? "Mengirim..." : "Kirim OTP"}</span>
                   </button>
                 </div>
               ) : null}
@@ -293,12 +300,14 @@ export function OtpVerificationForm() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-700 uppercase">
-                      🔐 Kode OTP (6 Digit)
+                      Kode OTP (6 Digit)
                     </label>
-                    <p className="text-xs text-slate-500">Masukkan kode yang dikirim ke WhatsApp</p>
+                    <p className="text-xs text-slate-500">
+                      Masukkan kode yang dikirim ke WhatsApp
+                    </p>
                   </div>
                   <div
-                    className="flex justify-center gap-2 bg-slate-50 p-4 rounded-lg"
+                    className="flex justify-center gap-2 rounded-lg bg-slate-50 p-4"
                     onPaste={(event) => handlePaste(event)}
                   >
                     {otpDigits.map((digit, index) => (
@@ -309,11 +318,13 @@ export function OtpVerificationForm() {
                         }}
                         type="text"
                         value={digit}
-                        onChange={(event) => handleDigitChange(index, event.target.value)}
+                        onChange={(event) =>
+                          handleDigitChange(index, event.target.value)
+                        }
                         onKeyDown={(event) => handleDigitKeyDown(index, event)}
                         maxLength={1}
                         inputMode="numeric"
-                        className="h-14 w-12 rounded-lg border-2 border-slate-300 bg-white text-center text-xl font-bold text-slate-900 outline-none transition duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 hover:border-slate-400"
+                        className="h-14 w-12 rounded-lg border-2 border-slate-300 bg-white text-center text-xl font-bold text-slate-900 transition duration-200 outline-none hover:border-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
                       />
                     ))}
                   </div>
@@ -323,7 +334,9 @@ export function OtpVerificationForm() {
                     disabled={verifyingOtp || otpDigits.join("").length < 6}
                     className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-emerald-700 active:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span>{verifyingOtp ? "Memverifikasi..." : "✓ Verifikasi OTP"}</span>
+                    <span>
+                      {verifyingOtp ? "Memverifikasi..." : "✓ Verifikasi OTP"}
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -335,21 +348,28 @@ export function OtpVerificationForm() {
                     disabled={resendSeconds > 0}
                     className="flex w-full items-center justify-center rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition duration-200 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {resendSeconds > 0 ? `Kirim ulang dalam ${resendSeconds}s` : "🔄 Kirim Ulang OTP"}
+                    {resendSeconds > 0
+                      ? `Kirim ulang dalam ${resendSeconds}s`
+                      : "🔄 Kirim Ulang OTP"}
                   </button>
                 </div>
               ) : null}
 
               {message && (
-                <div className={`rounded-lg p-4 text-sm font-medium border-l-4 ${
-                  message.includes("expired") || message.includes("gagal") || message.includes("belum valid")
-                    ? "bg-red-50 text-red-700 border-red-400"
-                    : message.includes("dikirim")
-                      ? "bg-blue-50 text-blue-700 border-blue-400"
-                      : message.includes("valid") || message.includes("berhasil")
-                        ? "bg-green-50 text-green-700 border-green-400"
-                        : "bg-slate-50 text-slate-700 border-slate-400"
-                }`}>
+                <div
+                  className={`rounded-lg border-l-4 p-4 text-sm font-medium ${
+                    message.includes("expired") ||
+                    message.includes("gagal") ||
+                    message.includes("belum valid")
+                      ? "border-red-400 bg-red-50 text-red-700"
+                      : message.includes("dikirim")
+                        ? "border-blue-400 bg-blue-50 text-blue-700"
+                        : message.includes("valid") ||
+                            message.includes("berhasil")
+                          ? "border-green-400 bg-green-50 text-green-700"
+                          : "border-slate-400 bg-slate-50 text-slate-700"
+                  }`}
+                >
                   {message}
                 </div>
               )}
@@ -359,7 +379,7 @@ export function OtpVerificationForm() {
                 onClick={handleBackToLogin}
                 className="w-full rounded-lg border-2 border-slate-300 bg-transparent px-4 py-3 text-sm font-semibold text-slate-700 transition duration-200 hover:bg-slate-50 active:bg-slate-100"
               >
-                ← Kembali ke Login
+                FKembali ke Login
               </button>
             </div>
           </div>
