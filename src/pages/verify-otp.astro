@@ -1,0 +1,13 @@
+---
+export const prerender = true
+
+import MainLayout from "@/layouts/main.astro"
+import { OtpVerificationForm } from "@/components/otp-verification-form"
+---
+
+<MainLayout
+  title="Verify OTP | Project Orbit Astro"
+  description="Verifikasi akun dengan OTP untuk melanjutkan ke dashboard."
+>
+  <OtpVerificationForm client:load />
+</MainLayout>
