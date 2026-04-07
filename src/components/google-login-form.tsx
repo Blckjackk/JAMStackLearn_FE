@@ -1,5 +1,10 @@
 import { useState } from "react"
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import {
+  FacebookAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
+  type AuthProvider,
+} from "firebase/auth"
 
 import { savePendingSessionUser, saveSessionUser } from "@/lib/authSession"
 import { auth } from "@/lib/firebase"
@@ -13,45 +18,98 @@ function toErrorMessage(error: unknown): string {
   return "Unexpected error"
 }
 
+function toFirebaseLoginMessage(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.message.includes("Firebase token does not contain email")) {
+      return "Akun Facebook kamu tidak membagikan email. Coba login dengan Google atau gunakan akun Facebook yang memiliki email aktif."
+    }
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof (error as { code?: unknown }).code === "string"
+  ) {
+    const code = (error as { code: string }).code
+
+    switch (code) {
+      case "auth/popup-closed-by-user":
+        return "Popup login ditutup sebelum selesai."
+      case "auth/popup-blocked":
+        return "Popup diblokir browser. Izinkan popup lalu coba lagi."
+      case "auth/account-exists-with-different-credential":
+        return "Email ini sudah terdaftar dengan provider lain."
+      case "auth/cancelled-popup-request":
+        return "Permintaan login dibatalkan."
+      default:
+        return toErrorMessage(error)
+    }
+  }
+
+  return toErrorMessage(error)
+}
+
 export function GoogleLoginForm() {
-  const [loading, setLoading] = useState(false)
+  const [loadingProvider, setLoadingProvider] = useState<
+    "google" | "facebook" | null
+  >(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  async function handleGoogleLogin() {
-    setLoading(true)
+  async function handleSocialLogin(
+    providerName: "Google" | "Facebook",
+    provider: AuthProvider,
+    loadingKey: "google" | "facebook"
+  ) {
+    setLoadingProvider(loadingKey)
     setMessage(null)
 
     try {
-      const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
       const token = await result.user.getIdToken()
 
       const user = await loginWithFirebase(token)
 
-      // Jika sudah verifikasi OTP, langsung ke dashboard
       if (user.isOtpVerified) {
         saveSessionUser(user)
-        setMessage(`Login berhasil. Selamat datang, ${user.username}.`)
+        setMessage(
+          `Login ${providerName} berhasil. Selamat datang, ${user.username}.`
+        )
         window.location.href = "/dashboard"
         return
       }
 
-      // Jika belum verifikasi OTP, simpan ke pending dan redirect ke verify-otp
       savePendingSessionUser(user)
-      setMessage("Redirecting to OTP verification...")
+      setMessage(`Login ${providerName} berhasil. Lanjutkan verifikasi OTP.`)
       window.location.href = "/verify-otp"
     } catch (error) {
-      setMessage(`Login gagal: ${toErrorMessage(error)}`)
+      setMessage(
+        `Login ${providerName} gagal: ${toFirebaseLoginMessage(error)}`
+      )
     } finally {
-      setLoading(false)
+      setLoadingProvider(null)
     }
+  }
+
+  async function handleGoogleLogin() {
+    const provider = new GoogleAuthProvider()
+    provider.addScope("email")
+    provider.addScope("profile")
+    await handleSocialLogin("Google", provider, "google")
+  }
+
+  async function handleFacebookLogin() {
+    const provider = new FacebookAuthProvider()
+    provider.addScope("email")
+    provider.addScope("public_profile")
+    await handleSocialLogin("Facebook", provider, "facebook")
   }
 
   return (
     <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8">
       <div className="grid w-full max-w-6xl gap-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
         {/* Left Side - Image */}
-        <div className="hidden md:relative md:flex md:items-center md:justify-center md:bg-gradient-to-br md:from-slate-50 md:to-slate-100">
+        <div className="hidden md:relative md:flex md:items-center md:justify-center md:bg-linear-to-br md:from-slate-50 md:to-slate-100">
           <img
             src="/auth-hero.jpg"
             alt="Login illustration"
@@ -60,7 +118,7 @@ export function GoogleLoginForm() {
             decoding="async"
           />
           {/* Fallback gradient overlay jika image belum load */}
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 to-emerald-400/20 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-linear-to-br from-sky-400/20 to-emerald-400/20 mix-blend-multiply" />
         </div>
 
         {/* Right Side - Form */}
@@ -83,7 +141,7 @@ export function GoogleLoginForm() {
               <button
                 type="button"
                 onClick={() => void handleGoogleLogin()}
-                disabled={loading}
+                disabled={loadingProvider !== null}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition duration-200 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
@@ -108,11 +166,25 @@ export function GoogleLoginForm() {
                     fill="#EA4335"
                   />
                 </svg>
-                {loading ? "Memproses..." : "Continue with Google"}
+                {loadingProvider === "google"
+                  ? "Memproses Google..."
+                  : "Continue with Google"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleFacebookLogin()}
+                disabled={loadingProvider !== null}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1877F2] px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-[#166fe5] active:bg-[#145fc2] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loadingProvider === "facebook"
+                  ? "Memproses Facebook..."
+                  : "Continue with Facebook"}
               </button>
 
               <p className="text-center text-xs text-slate-500">
-                Login menggunakan Google akan membuat akun baru jika belum ada.
+                Login dengan Google atau Facebook akan membuat akun baru jika
+                belum ada.
               </p>
             </div>
 
