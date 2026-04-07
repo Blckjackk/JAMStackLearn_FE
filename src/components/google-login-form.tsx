@@ -209,6 +209,23 @@ export function GoogleLoginForm() {
                 Hubungi admin
               </a>
             </p>
+
+            <p className="mt-3 text-center text-[11px] leading-5 text-slate-500">
+              Butuh info legal?{" "}
+              <a
+                href="/privacy-policy"
+                className="font-semibold text-slate-700 hover:text-slate-900"
+              >
+                Privacy Policy
+              </a>{" "}
+              dan{" "}
+              <a
+                href="/data-deletion"
+                className="font-semibold text-slate-700 hover:text-slate-900"
+              >
+                Data Deletion
+              </a>
+            </p>
           </div>
         </div>
       </div>

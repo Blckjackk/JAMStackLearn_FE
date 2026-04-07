@@ -1,0 +1,83 @@
+---
+export const prerender = true
+
+import MainLayout from "@/layouts/main.astro"
+
+const supportEmail =
+  import.meta.env.PUBLIC_SUPPORT_EMAIL ?? "support@example.com"
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? "Project Orbit"
+---
+
+<MainLayout
+  title={`Privacy Policy | ${siteName}`}
+  description={`Kebijakan privasi untuk ${siteName}.`}
+>
+  <main
+    class="relative isolate overflow-hidden bg-[#f8fafc] px-6 py-16 sm:py-20"
+  >
+    <div
+      class="absolute inset-0 -z-10"
+      style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 55%, #f0f9ff 100%);"
+    >
+    </div>
+    <div
+      class="mx-auto w-full max-w-4xl rounded-3xl border border-white/80 bg-white/90 p-8 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur"
+    >
+      <p class="text-xs font-semibold tracking-[0.32em] text-sky-700 uppercase">
+        Privacy Policy
+      </p>
+      <h1
+        class="mt-3 font-serif text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl"
+      >
+        Kebijakan privasi {siteName}
+      </h1>
+      <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+        Halaman ini menjelaskan data apa saja yang kami kumpulkan, bagaimana
+        data digunakan, dan bagaimana pengguna dapat meminta penghapusan data.
+      </p>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-2">
+        <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-base font-semibold text-slate-950">
+            Data yang kami simpan
+          </h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>• Nama dan email akun</li>
+            <li>• Data autentikasi dari provider login</li>
+            <li>• Data project, task, dan invite yang terkait akun</li>
+          </ul>
+        </section>
+        <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <h2 class="text-base font-semibold text-slate-950">
+            Cara kami menggunakan data
+          </h2>
+          <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+            <li>• Menyediakan akses login dan dashboard</li>
+            <li>• Menampilkan project dan task milik user</li>
+            <li>• Menjaga keamanan dan audit akses</li>
+          </ul>
+        </section>
+      </div>
+
+      <div
+        class="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-950"
+      >
+        <p class="font-semibold">Kontak privasi</p>
+        <p class="mt-1">
+          Jika Anda ingin meminta salinan data, memperbarui data, atau menghapus
+          data, silakan hubungi {supportEmail}.
+        </p>
+      </div>
+
+      <div
+        class="mt-8 rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700"
+      >
+        <p class="font-semibold text-slate-900">Perubahan kebijakan</p>
+        <p class="mt-1">
+          Kami dapat memperbarui kebijakan ini dari waktu ke waktu. Versi
+          terbaru akan tersedia di halaman ini.
+        </p>
+      </div>
+    </div>
+  </main>
+</MainLayout>
